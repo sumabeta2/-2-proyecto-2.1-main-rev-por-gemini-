@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowLeft, User, Heart, Pills, Clipboard, AlertCircle } from 'lucide-react';
+// Aseguramos la importación correcta de CLOCK y PILLS
+import { ArrowLeft, User, Heart, Pills, Clipboard, AlertCircle, Clock } from 'lucide-react'; 
 import { RoleType, PatientData } from '../types';
 
 interface PatientFormScreenProps {
