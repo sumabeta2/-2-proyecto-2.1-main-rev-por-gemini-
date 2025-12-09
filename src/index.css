@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos base */
+body {
+  font-family: 'Inter', sans-serif;
+  @apply bg-slate-950 text-slate-200;
+}
+
+/* Animaciones personalizadas (Requeridas por PostCSS para Vercel) */
+@layer utilities {
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  .animate-heartbeat {
+    animation: heartbeat 1.5s ease-in-out infinite;
+  }
+
+  @keyframes heartbeat-slow {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .animate-heartbeat-slow {
+    animation: heartbeat-slow 2s ease-in-out infinite;
+  }
+  
+  @keyframes ecg-flow {
+    0% { stroke-dashoffset: 500; }
+    100% { stroke-dashoffset: 0; }
+  }
+  .animate-ecg-flow {
+    animation: ecg-flow 2s linear infinite;
+  }
+}

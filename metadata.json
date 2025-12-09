@@ -1,0 +1,8 @@
+{
+  "name": "Proyecto 2",
+  "description": "SUMA - Asistente Médico Personal",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation"
+  ]
+}
