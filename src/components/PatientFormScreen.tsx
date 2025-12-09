@@ -1,138 +1,160 @@
 import React, { useState } from 'react';
-import { User, LogOut, HelpCircle, FileText, Shield } from 'lucide-react';
+import { ArrowLeft, User, Heart, Pills, Clipboard, AlertCircle } from 'lucide-react';
 import { RoleType, PatientData } from '../types';
 
 interface PatientFormScreenProps {
-  isAdmin: boolean;
-  onStartAssistance: (data: PatientData, role: RoleType) => void;
-  onLogout: () => void;
-  onOpenSupport: () => void;
-  onOpenHistory: () => void;
-  onOpenAdmin: () => void;
+  onBack: () => void;
+  onSubmit: (data: PatientData, role: RoleType) => void;
+  role: RoleType;
 }
 
-// Componente pequeño para el logo de SUMA (para evitar duplicación)
-const SumaLogo = ({ sizeClass = 'w-10 h-10', textClass = 'text-lg' }: { sizeClass?: string, textClass?: string }) => (
-    <div className={`relative ${sizeClass} flex items-center justify-center animate-heartbeat-slow shrink-0`}>
-        {/* Corazón Rojo Base */}
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full text-red-600 drop-shadow-sm">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-        </svg>
-        {/* Borde Azul */}
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="absolute w-full h-full text-blue-600 pointer-events-none scale-105">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-        </svg>
-        {/* Letra S */}
-        <span className={`absolute text-white ${textClass} font-bold font-sans pb-0.5 shadow-sm`}>S</span>
-        {/* ECG Animado (Mini) - No incluimos el path ECG aquí para mantenerlo limpio, confiamos en la clase animate-ecg-flow */}
-    </div>
-);
-
-
-export const PatientFormScreen: React.FC<PatientFormScreenProps> = ({ 
-  isAdmin, 
-  onStartAssistance, 
-  onLogout, 
-  onOpenSupport,
-  onOpenHistory,
-  onOpenAdmin
-}) => {
-  // Inicializamos el rol en null para obligar a seleccionarlo
-  const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
-  const [formData, setFormData] = useState<PatientData>({
+export const PatientFormScreen: React.FC<PatientFormScreenProps> = ({ onBack, onSubmit, role }) => {
+  const [data, setData] = useState<PatientData>({
     name: '',
     age: '',
     sex: '',
     medication: '',
-    history: ''
+    history: '',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setData({ ...data, [e.target.name]: e.target.value });
   };
 
-  // Validación: Nombre, Edad y ROL deben estar presentes
-  const isFormValid = formData.name.trim().length > 0 && 
-                      formData.age.trim().length > 0 && 
-                      selectedRole !== null;
-
-  const handleSubmit = () => {
-    if (isFormValid && selectedRole) {
-      onStartAssistance(formData, selectedRole);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (Object.values(data).every(val => val.trim() !== '')) {
+      onSubmit(data, role);
+    } else {
+      alert('Por favor, complete todos los campos.');
     }
   };
 
-  // Función para mostrar el rol de forma legible
-  const getRoleLabel = (role: RoleType) => {
-    switch (role) {
-      case 'MEDICO': return 'MÉDICO';
-      case 'ENFERMERO': return 'ENFERMERO';
-      case 'PARAMEDICO': return 'PARAMÉDICO';
-      case 'PRIMER_RESPONDIENTE': return '1er RESPONDIENTE';
-      default: return role;
-    }
-  };
+  const isFormValid = Object.values(data).every(val => val.trim() !== '');
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-white shadow-sm sticky top-0 z-20 border-b border-slate-100">
-        <div className="max-w-3xl mx-auto px-4 py-2 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <SumaLogo /> {/* COMPONENTE SIMPLIFICADO */}
-            <span className="font-extrabold text-lg text-slate-800 tracking-wider">SUMA</span>
+    <div className="min-h-screen bg-slate-900 flex flex-col font-sans text-slate-200">
+      {/* Cabecera */}
+      <header className="bg-slate-950 shadow-md sticky top-0 z-20 border-b border-slate-800">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+          <button onClick={onBack} className="p-2 -ml-2 text-slate-400 hover:bg-slate-800 rounded-full transition-colors">
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <div className="flex-1">
+            <h1 className="font-black text-lg text-white uppercase tracking-wide flex items-center gap-2">
+              <Clipboard className="w-5 h-5 text-red-500" />
+              NUEVO REPORTE
+            </h1>
           </div>
-          
-          <div className="flex items-center gap-2">
-            {/* Botón VER HISTORIAL */}
-            <button 
-              onClick={onOpenHistory}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 text-xs sm:text-sm font-medium transition-colors shadow-sm"
-            >
-              <FileText className="w-4 h-4" />
-              <span className="font-bold uppercase">VER HISTORIAL</span>
-            </button>
-
-            {/* Botón ADMON - Solo Admin */}
-            {isAdmin && (
-              <button 
-                onClick={onOpenAdmin}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black border border-black text-red-500 hover:bg-gray-900 text-xs sm:text-sm font-medium shadow-md transition-colors"
-              >
-                <Shield className="w-4 h-4" />
-                <span className="font-bold uppercase">ADMON</span>
-              </button>
-            )}
-
-            {/* Botón SALIR */}
-            <button 
-              onClick={onLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 text-xs sm:text-sm font-bold transition-colors uppercase ml-1"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="sr-only sm:not-sr-only">SALIR</span>
-            </button>
-          </div>
+          <span className="text-xs font-semibold text-red-500 bg-red-900/20 px-3 py-1 rounded-full border border-red-900">
+            ROL: {role}
+          </span>
         </div>
       </header>
 
-      {/* Franja NUEVO CASO */}
-      <div className="bg-slate-200 py-1 text-center border-b border-slate-300">
-        <span className="text-red-600 font-black text-xs uppercase tracking-[0.2em]">
-          NUEVO CASO
-        </span>
-        {isAdmin && (
-          <span className="text-blue-600 font-bold text-[10px] ml-2">
-            (MODO ADMIN ACTIVO)
-          </span>
-        )}
-      </div>
+      {/* Formulario */}
+      <main className="flex-grow w-full max-w-3xl mx-auto px-4 py-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
 
-      <main className="flex-grow w-full max-w-3xl mx-auto px-4 py-6 space-y-8">
-        <section className="space-y-4">
-          <div className="flex items-center gap-2 text-slate-800 border-b-2 border-slate-100 pb-2">
-             <User className="w-5 h-5 text-red-600" />
-             <h2 className="text-xl font-black tracking-wide uppercase">MI ROL ES: <span className="text-red-500">*</span></h2>
+          {/* Sección de Datos Básicos */}
+          <section className="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg space-y-4">
+            <h2 className="text-lg font-bold text-red-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+              <User className="w-5 h-5" /> Datos del Paciente
+            </h2>
+            <InputGroup icon={User} name="name" label="Nombre/ID" value={data.name} onChange={handleChange} />
+            <div className="grid grid-cols-2 gap-4">
+              <InputGroup icon={Clock} name="age" label="Edad" value={data.age} onChange={handleChange} type="number" />
+              <InputGroup icon={Heart} name="sex" label="Sexo (F/M)" value={data.sex} onChange={handleChange} />
+            </div>
+          </section>
+
+          {/* Sección de Antecedentes y Medicación */}
+          <section className="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg space-y-4">
+            <h2 className="text-lg font-bold text-blue-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+              <Pills className="w-5 h-5" /> Antecedentes
+            </h2>
+            <InputGroup icon={Pills} name="medication" label="Medicamentos Regulares/Alergias" value={data.medication} onChange={handleChange} />
+            <TextAreaGroup icon={Clipboard} name="history" label="Historia Clínica Relevante y Motivo de Consulta" value={data.history} onChange={handleChange} rows={5} />
+          </section>
+
+          {/* Botón de Envío y Alerta */}
+          <div className="pt-4">
+            {!isFormValid && (
+              <div className="p-3 bg-red-900/30 border border-red-700 text-red-300 rounded-lg mb-4 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5" />
+                <p className="text-sm font-medium">Debe completar todos los campos antes de solicitar asistencia.</p>
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={!isFormValid}
+              className={`w-full py-4 rounded-xl text-lg font-black uppercase transition-all shadow-md ${
+                isFormValid
+                  ? 'bg-red-600 hover:bg-red-700 text-white shadow-red-900/50'
+                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              }`}
+            >
+              SOLICITAR ASISTENCIA IA
+            </button>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            {(['MEDICO', 'ENFERMERO', 'PARAMEDICO', 'PRIMER_RESPONDIENTE
+        </form>
+      </main>
+    </div>
+  );
+};
+
+// Componente auxiliar para Input
+interface InputGroupProps {
+  icon: React.ElementType;
+  name: keyof PatientData;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  type?: string;
+}
+
+const InputGroup: React.FC<InputGroupProps> = ({ icon: Icon, name, label, value, onChange, type = 'text' }) => (
+  <div className="relative">
+    <label htmlFor={name} className="absolute -top-3 left-3 text-xs font-medium text-slate-400 bg-slate-800 px-1 z-10">
+      {label}
+    </label>
+    <Icon className="w-5 h-5 text-slate-500 absolute left-3 top-3.5" />
+    <input
+      type={type}
+      id={name}
+      name={name}
+      value={value}
+      onChange={onChange}
+      className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-red-500 font-medium transition-colors"
+      required
+    />
+  </div>
+);
+
+// Componente auxiliar para TextArea
+interface TextAreaGroupProps {
+  icon: React.ElementType;
+  name: keyof PatientData;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  rows?: number;
+}
+
+const TextAreaGroup: React.FC<TextAreaGroupProps> = ({ icon: Icon, name, label, value, onChange, rows = 3 }) => (
+  <div className="relative">
+    <label htmlFor={name} className="absolute -top-3 left-3 text-xs font-medium text-slate-400 bg-slate-800 px-1 z-10">
+      {label}
+    </label>
+    <Icon className="w-5 h-5 text-slate-500 absolute left-3 top-3.5" />
+    <textarea
+      id={name}
+      name={name}
+      value={value}
+      onChange={onChange}
+      rows={rows}
+      className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-red-500 font-medium transition-colors resize-none"
+      required
+    />
+  </div>
+);
